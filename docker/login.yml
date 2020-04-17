@@ -1,0 +1,14 @@
+--- # Set DNS for netplan configuration
+
+- hosts: "{{ hosts }}"
+  remote_user: ansible
+  become: yes
+  become_method: sudo
+  connection: ssh
+  gather_facts: yes
+
+  tasks:
+  - name: login to docker hub
+    docker_login:
+      username: hatamiarash7
+      password: "{{ docker_password }}"

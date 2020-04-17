@@ -1,0 +1,75 @@
+--- # Install Docker & Docker-compose
+
+- hosts: "{{ hosts }}"
+  remote_user: ansible
+  become: yes
+  become_method: sudo
+  connection: ssh
+  gather_facts: yes
+
+  tasks:
+  - name: Install docker packages
+    apt:
+      name: "{{ item }}"
+      state: present
+      update_cache: yes
+    with_items:
+      - apt-transport-https
+      - ca-certificates
+      - curl
+      - software-properties-common
+    tags:
+      - docker
+
+  - name: Add GPG key
+    apt_key:
+      url: https://download.docker.com/linux/ubuntu/gpg
+      state: present
+    tags:
+      - docker
+  
+  - name: Verify that we have the key with the fingerprint
+    apt_key:
+      id: 0EBFCD88
+      state: present
+    tags:
+      - docker
+  
+  - name: Set up the stable repository
+    apt_repository:
+      repo: deb [arch=amd64] https://download.docker.com/linux/ubuntu bionic stable
+      state: present
+    tags:
+      - docker
+  
+  - name: Update apt packages
+    apt:
+      update_cache: yes
+    tags:
+      - docker
+  
+  - name: Install docker
+    apt:
+      name: "{{ item }}"
+      state: present
+      update_cache: yes
+    with_items:
+      - docker-ce 
+      - docker-ce-cli 
+      - containerd.io
+    tags:
+      - docker
+  
+  - name: Add remote "ansible" user to "docker" group
+    user:
+      name: "ansible"
+      group: "docker"
+      append: yes
+    tags:
+      - docker
+  
+  - name: Install docker-compose
+    get_url: 
+      url : https://github.com/docker/compose/releases/download/1.25.5/docker-compose-Linux-x86_64
+      dest: /usr/local/bin/docker-compose
+      mode: 'u+x,g+x'

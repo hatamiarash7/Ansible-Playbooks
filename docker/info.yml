@@ -1,0 +1,30 @@
+--- # Get docker's info
+
+- hosts: "{{ hosts }}"
+  remote_user: ansible
+  become: yes
+  become_method: sudo
+  connection: ssh
+  gather_facts: yes
+
+  tasks:
+  - name: Update apt packages
+    apt:
+      update_cache: yes
+
+  - name: Install python-pip
+    apt:
+      name: python3-pip
+      state: present
+
+  - name: Install py-docker
+    pip:
+      name: docker
+      executable: pip3
+
+  - name: Get info on docker host and used disk space
+    docker_host_info:
+      disk_usage: yes
+    register: result
+
+  - debug: var=result.host_info
