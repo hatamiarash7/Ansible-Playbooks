@@ -24,5 +24,5 @@
 
   - name: Remove image
     docker_image:
-      state: absent
       name: '{{ docker_registry_address }}/{{ image }}'
+      state: absent
