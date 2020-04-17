@@ -1,0 +1,20 @@
+--- # Uninstall Nginx
+
+- name: Uninstall nginx
+  hosts: '{{ hosts }}'
+  remote_user: ansible
+  become: yes
+  become_method: sudo
+  connection: ssh
+  gather_facts: yes
+
+  tasks:
+    - name: Stop NGiNX
+      service:
+        name: nginx
+        state: stopped
+
+    - name: Uninstall nginx
+      apt:
+        name: nginx
+        state: absent
