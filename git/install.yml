@@ -1,0 +1,15 @@
+--- # Install Git
+
+- name: Install git
+  hosts: '{{ hosts }}'
+  remote_user: ansible
+  become: yes
+  become_method: sudo
+  connection: ssh
+  gather_facts: yes
+    
+  tasks:
+  - name: Install git client
+    apt:
+      name: git
+      state: latest 
