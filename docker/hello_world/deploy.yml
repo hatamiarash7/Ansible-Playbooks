@@ -1,0 +1,29 @@
+---
+- hosts: "{{ hosts }}"
+  remote_user: ansible
+  become: yes
+  become_method: sudo
+  connection: ssh
+  gather_facts: yes
+
+  tasks:
+  - name: pull image
+    docker_image:
+      name: library/hello-world
+      source: pull
+  
+  - name: Create container
+    docker_container:
+      detach: false
+      name: hello-world
+      image: hello-world
+    register: docker_container_output
+
+  - name: Show test output
+    debug:
+      msg: "{{ docker_container_output.ansible_facts.docker_container.Output }}"
+
+  - name: Remove the container
+    docker_container:
+      state: absent
+      name: hello-world
