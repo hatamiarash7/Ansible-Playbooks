@@ -1,5 +1,7 @@
 # Ansible Playbooks
 
+![logo](Ansible_logo.svg.png)
+
 Some playbooks for Ansible
 
 Create `env.yml` file in root :
