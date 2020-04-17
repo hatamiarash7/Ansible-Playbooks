@@ -1,6 +1,6 @@
 # Docker playbooks
 
-Deploy docker by Ansible
+Deploy Docker by Ansible ( with docker-compose )
 
 ### Install docker
 
