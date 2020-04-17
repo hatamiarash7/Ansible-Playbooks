@@ -1,0 +1,41 @@
+---
+
+- hosts: "{{ hosts }}"
+  remote_user: ansible
+  become: yes
+  become_method: sudo
+  connection: ssh
+  gather_facts: yes
+
+  vars:
+    image: nginx:1.17.9-alpine
+    container_name: nginx
+
+  tasks:
+  - block:
+    - name: Make the base image available locally
+      docker_image:
+        name: '{{ docker_registry_address }}/{{ image }}'
+        source: pull
+
+    - name: Create the container
+      docker_container:
+        image: '{{ docker_registry_address }}/{{ image }}'
+        name: '{{ container_name }}'
+        ports:
+          - "80:80"
+
+  - block:
+    - name: Test nginx
+      uri:
+        url: http://localhost
+        method: GET
+        return_content: yes
+      register: nginx_output
+  
+  - name: Show output
+    debug: var=nginx_output
+
+
+  
+  

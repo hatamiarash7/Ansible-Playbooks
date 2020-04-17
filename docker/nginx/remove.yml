@@ -1,0 +1,28 @@
+---
+
+- hosts: "{{ hosts }}"
+  remote_user: ansible
+  become: yes
+  become_method: sudo
+  connection: ssh
+  gather_facts: yes
+
+  vars:
+    image: nginx:1.17.9-alpine
+    container_name: nginx
+
+  tasks:
+  - name: Stop container
+    docker_container:
+      name: '{{ container_name }}'
+      state: stopped
+
+  - name: Remove container
+    docker_container:
+      name: '{{ container_name }}'
+      state: absent
+
+  - name: Remove image
+    docker_image:
+      state: absent
+      name: '{{ docker_registry_address }}/{{ image }}'
