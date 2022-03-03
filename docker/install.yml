@@ -18,58 +18,50 @@
       - ca-certificates
       - curl
       - software-properties-common
+      - lsb-release
+      - gnupg-agent
     tags:
       - docker
 
-  - name: Add GPG key
-    apt_key:
-      url: https://download.docker.com/linux/ubuntu/gpg
-      state: present
-    tags:
-      - docker
-  
-  - name: Verify that we have the key with the fingerprint
-    apt_key:
-      id: 0EBFCD88
-      state: present
-    tags:
-      - docker
-  
-  - name: Set up the stable repository
-    apt_repository:
-      repo: deb [arch=amd64] https://download.docker.com/linux/ubuntu bionic stable
-      state: present
-    tags:
-      - docker
-  
-  - name: Update apt packages
-    apt:
-      update_cache: yes
-    tags:
-      - docker
-  
-  - name: Install docker
-    apt:
-      name: "{{ item }}"
-      state: present
-      update_cache: yes
-    with_items:
-      - docker-ce 
-      - docker-ce-cli 
-      - containerd.io
-    tags:
-      - docker
-  
-  - name: Add remote "ansible" user to "docker" group
-    user:
-      name: "ansible"
-      group: "docker"
-      append: yes
-    tags:
-      - docker
-  
-  - name: Install docker-compose
-    get_url: 
-      url : https://github.com/docker/compose/releases/download/1.25.5/docker-compose-Linux-x86_64
-      dest: /usr/local/bin/docker-compose
-      mode: 'u+x,g+x'
+  - name: Add Docker GPG apt key
+      apt_key:
+        url: https://download.docker.com/linux/ubuntu/gpg
+        state: present
+
+    - name: Set lsb_release
+      shell: /usr/bin/lsb_release -cs
+      register: lsb_release
+
+    - name: Add Docker Repository
+      apt_repository:
+        repo: deb https://download.docker.com/linux/ubuntu {{ lsb_release.stdout }} stable
+        state: present
+
+    - name: Update apt and Install Docker-ce
+      apt:
+        name: "{{ item }}"
+        update_cache: yes
+        state: latest
+      loop:
+        - docker-ce
+        - docker-ce-cli
+        - containerd.io
+
+    - name: Add remote "{{ ansible_ssh_user }}" user to "docker" group
+      user:
+        name: "{{ ansible_ssh_user }}"
+        group: "docker"
+        append: yes
+
+    - name: Creates cli-plugins directory
+      file:
+        path: /home/{{ ansible_ssh_user }}/.docker/cli-plugins
+        state: directory
+
+    - name: Download docker-compose plugin
+      get_url:
+        url: https://github.com/docker/compose/releases/download/v2.2.3/docker-compose-linux-x86_64
+        dest: /home/{{ ansible_ssh_user }}/.docker/cli-plugins/docker-compose
+        name: "{{ ansible_ssh_user }}"
+        group: "{{ ansible_ssh_user }}"
+        mode: "a+x"
